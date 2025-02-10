@@ -9,7 +9,7 @@ module.exports = {
         await command.execute(interaction);
       } catch (error) {
         console.error('Command Error:', error);
-        await interaction.reply('There was an error executing this command.');
+        await interaction.reply('このコマンドの実行中にエラーが発生しました。');
       }
     }
   },
