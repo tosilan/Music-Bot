@@ -4,71 +4,71 @@ const { DisTubeError } = require('distube');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('skip')
-    .setDescription('Skip the current song.'),
+    .setName('skip')  // コマンド名
+    .setDescription('現在の曲をスキップします。'),  // コマンドの説明
   
-  async execute(interaction) {
-    const channel = interaction.member.voice.channel;
+  async execute(interaction) {  // コマンド実行時の処理
+    const channel = interaction.member.voice.channel;  // ユーザーのボイスチャネルを取得
   
-    if (!channel) {
+    if (!channel) {  // ボイスチャネルにいない場合
       const embed = new EmbedBuilder()
-        .setColor('#FF0000')
-        .setTitle('Error')
-        .setDescription('You need to be in a voice channel to skip the song.');
+        .setColor('#FF0000')  // 赤色
+        .setTitle('エラー')
+        .setDescription('曲をスキップするにはボイスチャネルに入っている必要があります。');
       
-      return interaction.reply({ embeds: [embed] });
+      return interaction.reply({ embeds: [embed] });  // エラーメッセージを返す
     }
   
     try {
-      const queue = interaction.client.playerManager.distube.getQueue(channel);
+      const queue = interaction.client.playerManager.distube.getQueue(channel);  // キューを取得
       
-      if (!queue || !queue.songs.length) {
+      if (!queue || !queue.songs.length) {  // キューが空の場合
         const embed = new EmbedBuilder()
-          .setColor('#FF0000')
-          .setTitle('No Songs')
-          .setDescription('There is no song currently playing in the queue.');
+          .setColor('#FF0000')  // 赤色
+          .setTitle('曲がありません')
+          .setDescription('現在キューに再生中の曲がありません。');
         
-        return interaction.reply({ embeds: [embed] });
+        return interaction.reply({ embeds: [embed] });  // エラーメッセージを返す
       }
 
-      await interaction.client.playerManager.distube.skip(channel);
+      await interaction.client.playerManager.distube.skip(channel);  // 曲をスキップ
 
       const embed = new EmbedBuilder()
-        .setColor('#00FF00') 
-        .setTitle('Song Skipped')
-        .setDescription('⏭ The current song has been skipped.');
+        .setColor('#00FF00')  // 緑色
+        .setTitle('曲をスキップしました')
+        .setDescription('⏭ 現在の曲がスキップされました。');
       
-      await interaction.reply({ embeds: [embed] });
+      await interaction.reply({ embeds: [embed] });  // 成功メッセージを返す
     } catch (error) {
-      console.error('Skip Error:', error);
+      console.error('スキップエラー:', error);  // エラーをコンソールに出力
 
       let embed;
       
-      if (error instanceof DisTubeError) {
+      if (error instanceof DisTubeError) {  // DisTubeError の場合
         if (error.errorCode === 'NO_QUEUE') {
           embed = new EmbedBuilder()
-            .setColor('#FF0000')
-            .setTitle('No Queue')
-            .setDescription('There is no queue to skip.');
+            .setColor('#FF0000')  // 赤色
+            .setTitle('キューがありません')
+            .setDescription('スキップするキューがありません。');
         } else if (error.errorCode === 'NO_UP_NEXT') {
           embed = new EmbedBuilder()
-            .setColor('#FF0000')
-            .setTitle('No Up Next')
-            .setDescription('There is no song to skip to next.');
+            .setColor('#FF0000')  // 赤色
+            .setTitle('次に再生する曲がありません')
+            .setDescription('次にスキップする曲がありません。');
         } else {
           embed = new EmbedBuilder()
-            .setColor('#FF0000')
-            .setTitle('Error')
-            .setDescription('An error occurred while trying to skip the song.');
+            .setColor('#FF0000')  // 赤色
+            .setTitle('エラー')
+            .setDescription('曲をスキップしようとしたときにエラーが発生しました。');
         }
       } else {
         embed = new EmbedBuilder()
-          .setColor('#FF0000')
-          .setTitle('Error')
-          .setDescription('An error occurred while trying to skip the song.');
+          .setColor('#FF0000')  // 赤色
+          .setTitle('エラー')
+          .setDescription('曲をスキップしようとしたときにエラーが発生しました。');
       }
 
-      await interaction.reply({ embeds: [embed] });
+      await interaction.reply({ embeds: [embed] });  // エラーメッセージを返す
     }
   },
 };
