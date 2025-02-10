@@ -2,39 +2,39 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
-      .setName('previous')
-      .setDescription('Play the previous song in the queue.'),
+      .setName('previous')  // コマンド名
+      .setDescription('キューの前の曲を再生します。'),  // コマンドの説明
   
-    async execute(interaction) {
-      const channel = interaction.member.voice.channel;
+    async execute(interaction) {  // コマンド実行時の処理
+      const channel = interaction.member.voice.channel;  // ユーザーのボイスチャネルを取得
   
-      if (!channel) {
+      if (!channel) {  // ボイスチャネルにいない場合
         const embed = new EmbedBuilder()
-          .setColor('#FF0000') 
-          .setTitle('Error')
-          .setDescription('You need to be in a voice channel to play the previous song.');
+          .setColor('#FF0000')  // 赤色
+          .setTitle('エラー')
+          .setDescription('音楽を再生するにはボイスチャネルに入っている必要があります。');
           
-        return interaction.reply({ embeds: [embed] });
+        return interaction.reply({ embeds: [embed] });  // エラーメッセージを返す
       }
   
       try {
-        await interaction.client.playerManager.distube.previous(channel);
+        await interaction.client.playerManager.distube.previous(channel);  // 前の曲を再生
 
         const embed = new EmbedBuilder()
-          .setColor('#00FF00') 
-          .setTitle('Previous Song')
-          .setDescription('⏮ Played the previous song.');
+          .setColor('#00FF00')  // 緑色
+          .setTitle('前の曲')
+          .setDescription('⏮ 前の曲を再生しました。');
           
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ embeds: [embed] });  // 成功メッセージを返す
       } catch (error) {
-        console.error('Previous Song Error:', error);
+        console.error('前の曲のエラー:', error);  // エラーをコンソールに出力
 
         const embed = new EmbedBuilder()
-          .setColor('#FF0000') 
-          .setTitle('Error')
-          .setDescription('An error occurred while trying to play the previous song.');
+          .setColor('#FF0000')  // 赤色
+          .setTitle('エラー')
+          .setDescription('前の曲を再生中にエラーが発生しました。');
           
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ embeds: [embed] });  // エラーメッセージを返す
       }
     },
 };
