@@ -3,7 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('autoplay')
-    .setDescription('Toggle autoplay mode.'),
+    .setDescription('自動再生モードを切り替えます。'),
 
   async execute(interaction) {
     const channel = interaction.member.voice.channel;
@@ -12,7 +12,7 @@ module.exports = {
       const noChannelEmbed = new EmbedBuilder()
         .setColor('#ff0000')
         .setTitle('Error')
-        .setDescription('❌ You need to be in a voice channel to toggle autoplay.')
+        .setDescription('❌ 自動再生を切り替えるには、音声チャンネルにいる必要があります。')
         .setTimestamp();
 
       return interaction.reply({ embeds: [noChannelEmbed], ephemeral: true });
@@ -24,18 +24,18 @@ module.exports = {
       const autoplayEmbed = new EmbedBuilder()
         .setColor(autoplay ? '#00ff00' : '#ff9900')
         .setTitle('Autoplay Toggled')
-        .setDescription(`🔄 Autoplay has been **${autoplay ? 'enabled' : 'disabled'}**.`)
+        .setDescription(`🔄 自動再生は **${autoplay ? '有効' : '無効'}になりました**.`)
         .setTimestamp();
 
       await interaction.reply({ embeds: [autoplayEmbed] });
 
     } catch (error) {
-      console.error('Toggle Autoplay Error:', error);
+      console.error('自動再生エラーの切り替え：', error);
 
       const errorEmbed = new EmbedBuilder()
         .setColor('#ff0000')
         .setTitle('Error')
-        .setDescription('❌ An error occurred while toggling autoplay. Please try again later.')
+        .setDescription('❌ 自動再生の切り替え中にエラーが発生しました。後でもう一度お試しください。')
         .setTimestamp();
 
       await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
