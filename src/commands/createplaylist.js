@@ -4,14 +4,14 @@ const Playlist = require('../models/Playlist');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('createplaylist')
-    .setDescription('Create a new playlist.')
+    .setDescription('新しいプレイリストを作成します。')
     .addStringOption(option => 
       option.setName('name')
-        .setDescription('Name of the playlist.')
+        .setDescription('プレイリストの名前。')
         .setRequired(true))
     .addBooleanOption(option => 
       option.setName('public')
-        .setDescription('Is the playlist public?')
+        .setDescription('プレイリストは公開ですか？')
         .setRequired(true)),
   
   async execute(interaction) {
@@ -22,6 +22,6 @@ module.exports = {
     const playlist = new Playlist({ userId, name, isPublic });
     await playlist.save();
 
-    await interaction.reply(`Playlist **${name}** has been created.`);
+    await interaction.reply(`プレイリスト **${name}** が作成されました。`);
   },
 };
