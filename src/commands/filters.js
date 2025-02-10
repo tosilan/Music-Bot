@@ -4,7 +4,7 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('filters')
-        .setDescription('Choose music filters with buttons'),
+        .setDescription('ボタンで音楽フィルターを選択します。'),
 
     async execute(interaction) {
         const filters = {
@@ -16,10 +16,9 @@ module.exports = {
 
         const embed = new EmbedBuilder()
             .setColor('#0099ff')
-            .setTitle('Select a Filter')
-            .setDescription('Choose a filter from the buttons below or click "Clear Filters" to remove all filters.');
+            .setTitle('フィルターを選択')
+            .setDescription('以下のボタンからフィルターを選択するか、「フィルターをクリア」をクリックしてすべてのフィルターを削除してください。');
             
-
         const filterButtons = Object.keys(filters).map(filter => {
             return new ButtonBuilder()
                 .setCustomId(`filter_${filter}`)
@@ -29,7 +28,7 @@ module.exports = {
 
         const clearButton = new ButtonBuilder()
             .setCustomId('filter_clear')
-            .setLabel('Clear Filters')
+            .setLabel('フィルターをクリア')
             .setStyle(ButtonStyle.Danger);
 
         const row = new ActionRowBuilder().addComponents([...filterButtons, clearButton]);
@@ -46,11 +45,11 @@ module.exports = {
             if (!queue) {
                 try {
                     await i.update({
-                        content: 'There is no music playing!',
+                        content: '音楽が再生されていません！',
                         components: []
                     });
                 } catch (error) {
-                    if (error.code !== 10062 && error.code !== 10008) console.error('Failed to update interaction:', error);
+                    if (error.code !== 10062 && error.code !== 10008) console.error('インタラクションの更新に失敗しました:', error);
                 }
                 return;
             }
@@ -64,21 +63,20 @@ module.exports = {
 
                 if (selectedFilter === 'clear') {
                     queue.filters.clear();
-                    newDescription = 'All filters have been cleared!';
+                    newDescription = 'すべてのフィルターがクリアされました！';
                 } else {
                     if (activeFilters.length > 0 && !activeFilters.includes(filter)) {
-                        newDescription = `Please clear the current filter first by clicking "Clear Filters" before applying the **${filter}** filter.`;
+                        newDescription = `最初に「フィルターをクリア」をクリックして現在のフィルターをクリアしてください。**${filter}** フィルターを適用する前に。`;
                     } else if (activeFilters.includes(filter)) {
                         queue.filters.remove(filter);
-                        newDescription = `The **${filter}** filter has been removed!`;
+                        newDescription = `**${filter}** フィルターが削除されました！`;
                     } else {
                         queue.filters.add(filter);
-                        newDescription = `The **${filter}** filter has been applied!`;
+                        newDescription = `**${filter}** フィルターが適用されました！`;
                     }
                 }
 
                 const updatedEmbed = EmbedBuilder.from(embed)
-                   
                     .setDescription(newDescription);
 
                 await i.update({
@@ -88,7 +86,7 @@ module.exports = {
 
             } catch (error) {
                 if (error.code !== 10062 && error.code !== 10008) {
-                    console.error('Failed to handle interaction:', error);
+                    console.error('インタラクションの処理に失敗しました:', error);
                 }
             }
         });
@@ -101,7 +99,7 @@ module.exports = {
                     components: [row]
                 });
             } catch (error) {
-                if (error.code !== 10008) console.error('Failed to edit interaction reply:', error);
+                if (error.code !== 10008) console.error('インタラクションの返信の編集に失敗しました:', error);
             }
         });
     },
