@@ -1,55 +1,64 @@
+// 環境変数を読み込む
 require('dotenv').config();
+// Discord のスラッシュコマンドを作成
 const { SlashCommandBuilder } = require('@discordjs/builders');
+// Discord のアクション行、ボタン、埋め込みメッセージを使用
 const { ActionRowBuilder, ButtonBuilder, EmbedBuilder, ButtonStyle } = require('discord.js');
+// Google API を使用
 const { google } = require('googleapis');
 const yt = google.youtube('v3');
+// YouTube 検索パッケージをインポート
 const ytSearch = require('yt-search');
+// Spotify API ライブラリ
 const SpotifyWebApi = require('spotify-web-api-node');
 
+// API キーの設定
 const { youtubeApiKey, spotify } = require('../config/config');
 const API_KEY = youtubeApiKey;
+// Spotify API のインスタンスを作成
 const spotifyApi = new SpotifyWebApi({
   clientId: spotify.clientId,
   clientSecret: spotify.clientSecret,
 });
 
+// スラッシュコマンドのエクスポート
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('play')
-    .setDescription('Search and play a song or playlist.')
+    .setName('play')  // コマンド名
+    .setDescription('曲またはプレイリストを検索して再生します。')
     .addSubcommand(subcommand =>
       subcommand
-        .setName('search')
-        .setDescription('Search for and play a song.')
+        .setName('search')  // 検索サブコマンド
+        .setDescription('曲を検索して再生します。')
         .addStringOption(option =>
           option.setName('query')
-            .setDescription('The song to search for')
-            .setRequired(true)))
+            .setDescription('検索する曲')
+            .setRequired(true)))  // 必須オプション
     .addSubcommand(subcommand =>
       subcommand
-        .setName('playlist')
-        .setDescription('Play a playlist from YouTube.')
+        .setName('playlist')  // プレイリストサブコマンド
+        .setDescription('YouTube のプレイリストを再生します。')
         .addStringOption(option =>
           option.setName('url')
-            .setDescription('The URL of the YouTube playlist')
-            .setRequired(true)))
+            .setDescription('YouTube プレイリストの URL')
+            .setRequired(true)))  // 必須オプション
     .addSubcommand(subcommand =>
       subcommand
-        .setName('spotify')
-        .setDescription('Play a song or playlist from Spotify.')
+        .setName('spotify')  // Spotify サブコマンド
+        .setDescription('Spotify の曲またはプレイリストを再生します。')
         .addStringOption(option =>
           option.setName('url')
-            .setDescription('The URL of the Spotify track or playlist')
+            .setDescription('Spotify トラックまたはプレイリストの URL')
             .setRequired(true))),
 
-  async execute(interaction) {
+  async execute(interaction) {  // コマンドが実行されたとき
     const subcommand = interaction.options.getSubcommand();
     const query = interaction.options.getString('query') || interaction.options.getString('url');
-    const channel = interaction.member.voice.channel;
+    const channel = interaction.member.voice.channel;  // ユーザーのボイスチャネルを取得
 
-    if (!channel) {
+    if (!channel) {  // ボイスチャネルにいない場合
       return interaction.reply({
-        embeds: [new EmbedBuilder().setColor('#FFFF00').setDescription('🚫 You need to be in a voice channel to play music.')],
+        embeds: [new EmbedBuilder().setColor('#FFFF00').setDescription('🚫 音楽を再生するにはボイスチャネルに入っている必要があります。')],
         ephemeral: true,
       });
     }
@@ -57,6 +66,7 @@ module.exports = {
     try {
       await interaction.deferReply();
 
+      // プレイリスト再生処理
       if (subcommand === 'playlist') {
         const playlistIdMatch = query.match(/list=([^&]+)/);
         if (playlistIdMatch) {
@@ -73,7 +83,7 @@ module.exports = {
 
           if (videos.length === 0) {
             return interaction.followUp({
-              embeds: [new EmbedBuilder().setColor('#FFFF00').setDescription('🚫 No videos found in the playlist.')],
+              embeds: [new EmbedBuilder().setColor('#FFFF00').setDescription('🚫 プレイリストに動画が見つかりませんでした。')],
             });
           }
 
@@ -97,37 +107,38 @@ module.exports = {
             embeds: [
               new EmbedBuilder()
                 .setColor('#FF00FF')
-                .setDescription(`🎶 Queued **${videos.length}** songs from the playlist.`),
+                .setDescription(`🎶 プレイリストから **${videos.length}** 曲をキューしました。`),
             ],
           });
           return;
         } else {
           return interaction.followUp({
-            embeds: [new EmbedBuilder().setColor('#FFFF00').setDescription('🚫 Invalid playlist URL.')],
+            embeds: [new EmbedBuilder().setColor('#FFFF00').setDescription('🚫 無効なプレイリスト URL です。')],
           });
         }
       }
 
+      // 曲検索処理
       if (subcommand === 'search') {
         const searchResult = await ytSearch(query);
 
         if (!searchResult || !searchResult.videos.length) {
           return interaction.followUp({
-            embeds: [new EmbedBuilder().setColor('#FFFF00').setDescription('🚫 No songs found for your query.')],
+            embeds: [new EmbedBuilder().setColor('#FFFF00').setDescription('🚫 あなたの検索クエリに対して曲が見つかりませんでした。')],
           });
         }
 
-        const videos = searchResult.videos.slice(0, 5);
+        const videos = searchResult.videos.slice(0, 5);  // 上位5つの動画を取得
 
         const embed = new EmbedBuilder()
-          .setTitle('Search Results')
-          .setDescription('Select a song to play:')
+          .setTitle('検索結果')
+          .setDescription('再生する曲を選択してください:')
           .setColor('#ff0000');
         
         videos.forEach((video, index) => {
           embed.addFields({
             name: `${index + 1}. ${video.title}`,
-            value: `Duration: ${video.timestamp} | ${video.author.name}`,
+            value: `時間: ${video.timestamp} | ${video.author.name}`,
             inline: false,
           });
         });
@@ -150,7 +161,7 @@ module.exports = {
         const collector = interaction.channel.createMessageComponentCollector({ filter, time: 15000 });
 
         collector.on('collect', async i => {
-          const [action, index] = i.customId.split('_');
+          const [action, index] = i.customId.split('_'); // 選択された曲のインデックスを取得
           const selectedVideo = videos[parseInt(index)];
 
           if (selectedVideo) {
@@ -166,26 +177,25 @@ module.exports = {
                 row1.components.map(button => button.setDisabled(true))
               );
 
-
               await sentMessage.edit({ components: [disabledRow1] });
               await interaction.followUp({
                 embeds: [
                   new EmbedBuilder()
                     .setColor('#FF00FF')
-                    .setDescription(`🎶 Queued: **${selectedVideo.title}**`),
+                    .setDescription(`🎶 キューされた: **${selectedVideo.title}**`),
                 ],
                 ephemeral: true,
               });
 
             } catch (error) {
-              console.error('Play Error:', error);
+              console.error('再生エラー:', error);
               await interaction.followUp({
-                embeds: [new EmbedBuilder().setColor('#FFFF00').setDescription('🚫 An error occurred while trying to play the song.')],
+                embeds: [new EmbedBuilder().setColor('#FFFF00').setDescription('🚫 曲を再生しようとしてエラーが発生しました。')],
               });
             }
           } else {
             await i.followUp({
-              embeds: [new EmbedBuilder().setColor('#FFFF00').setDescription('🚫 The selected song could not be found.')],
+              embeds: [new EmbedBuilder().setColor('#FFFF00').setDescription('🚫 選択された曲が見つかりませんでした。')],
               ephemeral: true,
             });
           }
@@ -196,12 +206,13 @@ module.exports = {
         collector.on('end', collected => {
           if (!collected.size) {
             interaction.editReply({
-              embeds: [new EmbedBuilder().setColor('#FFFFFF').setDescription('⚠️ You didn\'t select any song in time.')],
+              embeds: [new EmbedBuilder().setColor('#FFFFFF').setDescription('⚠️ 時間内に曲を選択しませんでした。')],
             });
           }
         });
 
-      }else if (subcommand === 'spotify') {
+      // Spotify からの再生処理
+      } else if (subcommand === 'spotify') {
         const isSpotifyPlaylist = query.includes('playlist');
         const isSpotifyTrack = query.includes('track');
         const isSpotifyAlbum = query.includes('album');
@@ -242,7 +253,7 @@ module.exports = {
                     trackNames = artistTopTracks.body.tracks
                         .map(track => `${track.name} ${track.artists[0]?.name || ''}`);
                 } else if (isSpotifyCollection) {
-                    return; // Handle Spotify collection if needed
+                    return; // Spotifyコレクションが必要であれば処理を追加
                 }
     
                 const queuedTracks = [];
@@ -262,7 +273,7 @@ module.exports = {
                                 embeds: [
                                     new EmbedBuilder()
                                         .setColor('#FF0000')
-                                        .setDescription(`🚫 Skipped age-restricted content: **${trackName}**. This track cannot be played in non-NSFW channels.`),
+                                        .setDescription(`🚫 年齢制限コンテンツをスキップしました: **${trackName}**。このトラックは非NSFWチャンネルでは再生できません。`),
                                 ],
                             });
                             continue;
@@ -291,7 +302,7 @@ module.exports = {
                         embeds: [
                             new EmbedBuilder()
                                 .setColor('#FF00FF')
-                                .setDescription(`🎶 Queued **${queuedTracks.length}** tracks from Spotify.`),
+                                .setDescription(`🎶 Spotify から **${queuedTracks.length}** トラックをキューしました。`),
                         ],
                     });
                 } else {
@@ -299,15 +310,15 @@ module.exports = {
                         embeds: [
                             new EmbedBuilder()
                                 .setColor('#FFFF00')
-                                .setDescription('🚫 No valid tracks found from Spotify.'),
+                                .setDescription('🚫 Spotify から有効なトラックが見つかりませんでした。'),
                         ],
                     });
                 }
     
             } catch (error) {
-                let errorMessage = '🚫 An error occurred while trying to play from Spotify.';
+                let errorMessage = '🚫 Spotify からの再生時にエラーが発生しました。';
                 if (error.message === 'SpotifyAccessError') {
-                    errorMessage = '🚫 Failed to retrieve a Spotify access token.';
+                    errorMessage = '🚫 Spotify アクセストークンの取得に失敗しました。';
                 }
     
                 await interaction.followUp({
@@ -316,16 +327,14 @@ module.exports = {
             }
         } else {
             await interaction.followUp({
-                embeds: [new EmbedBuilder().setColor('#FFFF00').setDescription('🚫 Invalid Spotify URL.')],
+                embeds: [new EmbedBuilder().setColor('#FFFF00').setDescription('🚫 無効な Spotify URL です。')],
             });
         }
     }
-    
+
     } catch (error) {
-      //console.error('Error:', error);
       await interaction.followUp({
-        embeds: [new EmbedBuilder().setColor('#FFFF00').setDescription('🚫 An error occurred while processing your request.')],
+        embeds: [new EmbedBuilder().setColor('#FFFF00').setDescription('🚫 リクエストの処理中にエラーが発生しました。')],
       });
     }
-  },
 };
