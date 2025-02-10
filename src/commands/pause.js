@@ -2,7 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('一時停止')
+    .setName('pause')
     .setDescription('現在の曲を一時停止します。'),
 
   async execute(interaction) {
