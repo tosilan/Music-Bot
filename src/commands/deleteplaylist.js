@@ -4,10 +4,10 @@ const Playlist = require('../models/Playlist');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('deleteplaylist')
-    .setDescription('Delete a playlist.')
+    .setDescription('プレイリストを削除します。')
     .addStringOption(option => 
       option.setName('name')
-        .setDescription('Name of the playlist.')
+        .setDescription('プレイリストの名前。')
         .setRequired(true)),
   
   async execute(interaction) {
@@ -16,9 +16,9 @@ module.exports = {
 
     const playlist = await Playlist.findOneAndDelete({ name, userId });
     if (!playlist) {
-      return interaction.reply('Playlist not found or you do not have permission to delete it.');
+      return interaction.reply('プレイリストが見つからないか、削除する権限がありません。');
     }
 
-    await interaction.reply(`Playlist **${name}** has been deleted.`);
+    await interaction.reply(`プレイリスト **${name}** が削除されました。`);
   },
 };
