@@ -5,16 +5,16 @@ const path = require('path');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('help')
-    .setDescription('Shows all available commands'),
+    .setDescription('利用可能なコマンドを表示します。'),
   
   async execute(interaction) {
-    // Path to the folder containing your command files
+    // コマンドファイルが含まれるフォルダーへのパス
     const commandsFolder = path.join(__dirname);
     const commandFiles = fs.readdirSync(commandsFolder).filter(file => file.endsWith('.js'));
 
     const helpEmbed = new EmbedBuilder()
-      .setTitle('Help - Available Commands')
-      .setDescription('- Developed By : GlaceYT\n- Type : Free Version')
+      .setTitle('ヘルプ - 利用可能なコマンド')
+      .setDescription('- 開発者 : GlaceYT\n- タイプ : 無料版')
       .setColor('#0099ff');
 
     commandFiles.forEach(file => {
