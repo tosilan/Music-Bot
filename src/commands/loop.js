@@ -2,7 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('ループ')
+    .setName('loop')
     .setDescription('キューのリピートモードを設定します。')
     .addIntegerOption(option =>
       option.setName('モード')
