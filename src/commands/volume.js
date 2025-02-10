@@ -4,69 +4,69 @@ const { DisTubeError } = require('distube');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('volume')
-    .setDescription('Set the volume for the music playback.')
+    .setName('volume')  // コマンド名
+    .setDescription('音楽再生のボリュームを設定します。')  // コマンドの説明
     .addIntegerOption(option => 
-      option.setName('volume')
-        .setDescription('Volume level (0-100).')
-        .setRequired(true)),
+      option.setName('volume')  // ボリュームのオプション
+        .setDescription('ボリュームレベル (0-100)。')
+        .setRequired(true)),  // 必須オプション
   
-  async execute(interaction) {
-    const volume = interaction.options.getInteger('volume');
-    const channel = interaction.member.voice.channel;
+  async execute(interaction) {  // コマンド実行時の処理
+    const volume = interaction.options.getInteger('volume');  // ボリュームを取得
+    const channel = interaction.member.voice.channel;  // ユーザーのボイスチャネルを取得
   
-    if (!channel) {
+    if (!channel) {  // ボイスチャネルにいない場合
       const embed = new EmbedBuilder()
-        .setColor('#FF0000')
-        .setTitle('Error')
-        .setDescription('You need to be in a voice channel to set the volume.');
+        .setColor('#FF0000')  // 赤色
+        .setTitle('エラー')
+        .setDescription('ボリュームを設定するにはボイスチャネルに入っている必要があります。');
       
-      return interaction.reply({ embeds: [embed] });
+      return interaction.reply({ embeds: [embed] });  // エラーメッセージを返す
     }
   
-    if (volume < 0 || volume > 100) {
+    if (volume < 0 || volume > 100) {  // ボリュームが範囲外の場合
       const embed = new EmbedBuilder()
-        .setColor('#FF0000') 
-        .setTitle('Invalid Volume')
-        .setDescription('Volume level must be between 0 and 100.');
+        .setColor('#FF0000')  // 赤色
+        .setTitle('無効なボリューム')
+        .setDescription('ボリュームレベルは0から100の間でなければなりません。');
       
-      return interaction.reply({ embeds: [embed] });
+      return interaction.reply({ embeds: [embed] });  // エラーメッセージを返す
     }
   
     try {
-      await interaction.client.playerManager.distube.setVolume(channel, volume);
+      await interaction.client.playerManager.distube.setVolume(channel, volume);  // ボリュームを設定
       
       const embed = new EmbedBuilder()
-        .setColor('#00FF00') 
-        .setTitle('Volume Set')
-        .setDescription(`🔊 Volume set to ${volume}%.`);
+        .setColor('#00FF00')  // 緑色
+        .setTitle('ボリューム設定完了')
+        .setDescription(`🔊 ボリュームが ${volume}% に設定されました。`);
       
-      await interaction.reply({ embeds: [embed] });
+      await interaction.reply({ embeds: [embed] });  // 成功メッセージを返す
     } catch (error) {
-      console.error('Set Volume Error:', error);
+      console.error('ボリューム設定エラー:', error);  // エラーをコンソールに出力
       
       let embed;
       
-      if (error instanceof DisTubeError) {
+      if (error instanceof DisTubeError) {  // DisTubeError の場合
         if (error.errorCode === 'NO_QUEUE') {
           embed = new EmbedBuilder()
-            .setColor('#FF0000') 
-            .setTitle('No Queue')
-            .setDescription('There is no queue to set the volume.');
+            .setColor('#FF0000')  // 赤色
+            .setTitle('キューがありません')
+            .setDescription('ボリュームを設定するキューがありません。');
         } else {
           embed = new EmbedBuilder()
-            .setColor('#FF0000') 
-            .setTitle('Error')
-            .setDescription('An error occurred while setting the volume.');
+            .setColor('#FF0000')  // 赤色
+            .setTitle('エラー')
+            .setDescription('ボリュームを設定中にエラーが発生しました。');
         }
       } else {
         embed = new EmbedBuilder()
-          .setColor('#FF0000')
-          .setTitle('Error')
-          .setDescription('An error occurred while setting the volume.');
+          .setColor('#FF0000')  // 赤色
+          .setTitle('エラー')
+          .setDescription('ボリュームを設定中にエラーが発生しました。');
       }
       
-      await interaction.reply({ embeds: [embed] });
+      await interaction.reply({ embeds: [embed] });  // エラーメッセージを返す
     }
   },
 };
